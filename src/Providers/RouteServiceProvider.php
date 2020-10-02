@@ -16,6 +16,7 @@ use Netflex\Pages\Middleware\JwtProxy;
 use Netflex\Foundation\Redirect;
 use Netflex\Pages\JwtPayload;
 use Netflex\Pages\PreviewRequest;
+use Netflex\Pages\Attributes\Route as RouteAttribute;
 
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Route;
@@ -279,6 +280,19 @@ class RouteServiceProvider extends ServiceProvider
             tap(new $class, function (Controller $controller) use ($page) {
               $class = get_class($controller);
               $routeDefintions = $controller->getRoutes();
+
+              if (PHP_MAJOR_VERSION >= 8) {
+                $reflectionClass = new ReflectionClass($class);
+                /** @var RouteAttribute[] */
+                $routes = $reflectionClass->getAttributes(RouteAttribute::class);
+                foreach ($routes as $route) {
+                  $routeDefintions->prepend((object) [
+                    'url' => $route->url,
+                    'action' => $route->action,
+                    'methods' => is_array($route->methods) ? $route->methods : [$route->methods]
+                  ]);
+                }
+              }
 
               foreach ($routeDefintions as $routeDefintion) {
                 $routeDefintion->url = trim($routeDefintion->url, '/');
