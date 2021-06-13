@@ -67,7 +67,7 @@ $stack = $attributes->get('stack') ? $attributes->get('stack') : null;
 @endif
 
 @if($hasSlot)
-  <{{ $is }} class="{!! $class !!}">
+  <{{ $is }} class="{!! $class !!}" {!! $attributes->except(['stack', 'class'])->toHtml() !!}>
     {{ $slot }}
   </{{ $is }}>
 @endif
